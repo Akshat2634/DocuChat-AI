@@ -7,7 +7,7 @@ Implementation of embedding model using OpenAI's API.
 import logging
 from typing import List, Optional, Dict, Any 
 import numpy as np
-from backend.config import RAGIndexingConfig
+from config import RAGIndexingConfig
 from openai import AsyncOpenAI
 from .base_embedding import BaseEmbeddingModel
 
@@ -21,27 +21,29 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
     Uses OpenAI's embedding API to generate text embeddings.
     """
     
-    def __init__(
-        self, 
-    ):
-        self.model_name = RAGIndexingConfig.OPENAI_EMBEDDING_MODEL
-        self.api_key = RAGIndexingConfig.OPENAI_API_KEY
+    def __init__(self):
+        config = RAGIndexingConfig()
+        super().__init__(config.OPENAI_EMBEDDING_MODEL)
+        self.api_key = config.OPENAI_API_KEY
         self.client = None
-        self.batch_size = RAGIndexingConfig.BATCH_SIZE
+        self.batch_size = config.BATCH_SIZE
+        # Set embedding dimension based on model
+        if "text-embedding-3-small" in self.model_name:
+            self.embedding_dim = 1536
+        elif "text-embedding-3-large" in self.model_name:
+            self.embedding_dim = 3072
+        else:
+            self.embedding_dim = 1536  # default
+
     
-    def initialize(self) -> None:
+    async def initialize(self) -> None:
         """Initialize the OpenAI client."""
         if not self.api_key:
-            raise ValueError("OpenAI API key is required")
+            raise ValueError("OpenAI API key is required. Please set OPENAI_API_KEY in your environment.")
         
         try:
             self.client = AsyncOpenAI(api_key=self.api_key)
-        
-            # Test the connection with a simple embedding
-            test_response = self.client.embeddings.create(
-                model=self.model_name,
-                input="test"
-            )
+            self.is_initialized = True
             logger.info(f"OpenAI embedding model '{self.model_name}' initialized successfully")
             
         except Exception as e:
@@ -120,7 +122,7 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
         """Get detailed model information."""
         base_info = super().get_model_info()
         base_info.update({
-            "provider": self.model_name,
+            "provider": "openai",
             "batch_size": self.batch_size,
         })
         return base_info

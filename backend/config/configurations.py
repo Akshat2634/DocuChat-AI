@@ -8,7 +8,7 @@ and creates embeddings for similarity search using Qwen3 models.
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Optional
-from backend.config.base import BaseConfig
+from config.base import BaseConfig
 
 class RAGIndexingConfig(BaseConfig):
     """

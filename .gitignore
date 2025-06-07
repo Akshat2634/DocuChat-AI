@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+.env.test
+
+
+
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+backend/data/*.pdf
+backend/data/*.docx
+backend/data/*.txt
+backend/vector_db/
+*.log
+
+# Dependencies
+node_modules/

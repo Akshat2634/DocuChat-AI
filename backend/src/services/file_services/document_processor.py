@@ -4,7 +4,7 @@ import logging
 import io
 from fastapi import UploadFile, HTTPException
 from typing import Tuple
-from backend.config.logger import setup_logging
+from config.logger import setup_logging
 
 # Text extraction imports
 import PyPDF2
@@ -141,9 +141,9 @@ class DocumentProcessor:
         logger.info(f"Extracting text content for file type: {file_type}")
         
         if file_type == "pdf":
-            return self.extract_text_from_pdf(file_content)
+            return await self.extract_text_from_pdf(file_content)
         elif file_type == "docx":
-            return self.extract_text_from_docx(file_content)
+            return await self.extract_text_from_docx(file_content)
         else:
             raise HTTPException(
                 status_code=400,
