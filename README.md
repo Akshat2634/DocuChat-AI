@@ -144,21 +144,7 @@ pip install -r requirements.txt
 ```
 
 #### Environment Configuration
-Create a `.env` file in the backend directory:
-```env
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Application Settings
-ENVIRONMENT=development
-LOG_LEVEL=INFO
-DATA_DIR=./data
-VECTOR_DB_PATH=./vector_db
-
-# Server Configuration
-HOST=0.0.0.0
-PORT=8000
-```
+Create a `.env` file in the backend directory.
 
 #### Start the Backend Server
 ```bash
