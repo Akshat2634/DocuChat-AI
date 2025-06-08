@@ -28,13 +28,9 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
         self.api_key = config.OPENAI_API_KEY
         self.client = None
         self.batch_size = config.BATCH_SIZE
-        # Set embedding dimension based on model
-        if "text-embedding-3-small" in self.model_name:
-            self.embedding_dim = 1536
-        elif "text-embedding-3-large" in self.model_name:
-            self.embedding_dim = 3072
-        else:
-            self.embedding_dim = 1536  # default
+        self.embedding_dim = config.OPENAI_EMBEDDING_DIMENSION
+        self.model_name = config.OPENAI_EMBEDDING_MODEL
+
 
     
     async def initialize(self) -> None:
@@ -62,7 +58,7 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
             numpy array of embeddings
         """
         if not self.is_initialized:
-            raise ValueError("Model not initialized. Call initialize() first.")
+            await self.initialize()
         
         if not texts:
             return np.array([])
@@ -103,7 +99,7 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
             numpy array representing the embedding
         """
         if not self.is_initialized:
-            raise ValueError("Model not initialized. Call initialize() first.")
+            await self.initialize()
         
         try:
             response = await self.client.embeddings.create(

@@ -53,7 +53,7 @@ class RAGIndexingConfig(BaseConfig):
         description="OpenAI embedding dimension"
     )
     
-    OPENAI_EMBEDDING_PROVIDER: str = Field(
+    EMBEDDING_PROVIDER: str = Field(
         default="openai",
         description="OpenAI embedding provider"
     )

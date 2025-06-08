@@ -85,6 +85,7 @@ class LanceDBVectorStore:
             await self.setup_lance_db()
         
         try:
+            #TODO: Commenting for now as I will be making folder structure for each user based on user_id
             # Always delete existing table if it exists
             if self.table_name in self.db.table_names():
                 logger.info(f"Deleting existing table: {self.table_name}")

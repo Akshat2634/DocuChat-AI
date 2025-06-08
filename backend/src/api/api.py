@@ -1,6 +1,7 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from src.api.routers import document_upload
 from config.logger import setup_logging
 
 setup_logging()
@@ -15,6 +16,9 @@ app = FastAPI(
 origins = [
     "*",
 ]
+
+
+app.include_router(document_upload.router)
 
 app.add_middleware(
     CORSMiddleware,
