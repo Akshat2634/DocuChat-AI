@@ -31,6 +31,7 @@ class LanceDBVectorStore:
         self.table_name = config.LANCEDB_TABLE_NAME
         self.db: Optional[DBConnection] = None
         self.table: Optional[Table] = None
+        self.dimension = config.OPENAI_EMBEDDING_DIMENSION
 
         
     async def setup_lance_db(self) -> DBConnection:
@@ -64,7 +65,7 @@ class LanceDBVectorStore:
         return pa.schema([
             pa.field("id", pa.string()),
             pa.field("text", pa.string()),
-            pa.field("embedding", pa.list_(pa.float32(), 1536)),  # Fixed-size list with 1536 dimensions
+            pa.field("embedding", pa.list_(pa.float32(), self.dimension)),  # Fixed-size list with 1536 dimensions
             pa.field("metadata", pa.string()),  # JSON string for flexibility
             pa.field("file_name", pa.string()),
             pa.field("file_type", pa.string()),
@@ -99,7 +100,7 @@ class LanceDBVectorStore:
             schema = pa.schema([
                 pa.field("id", pa.string()),
                 pa.field("text", pa.string()),
-                pa.field("embedding", pa.list_(pa.float32(), 1536)),  # Fixed-size list
+                pa.field("embedding", pa.list_(pa.float32(), self.dimension)),  # Fixed-size list
                 pa.field("metadata", pa.string()),
                 pa.field("file_name", pa.string()),
                 pa.field("file_type", pa.string()),
@@ -111,7 +112,7 @@ class LanceDBVectorStore:
             sample_data = [{
                 "id": str(uuid.uuid4()),
                 "text": "sample text",
-                "embedding": [0.1] * 1536,  # List of 1536 float values
+                "embedding": [0.1] * self.dimension,  # List of 1536 float values
                 "metadata": json.dumps({"sample": True}),
                 "file_name": "sample.txt",
                 "file_type": "txt",
@@ -174,7 +175,7 @@ class LanceDBVectorStore:
                 embeddings = embeddings.reshape(1, -1)
             
             # Validate embedding dimensions
-            expected_dim = 1536  # OpenAI embedding dimension
+            expected_dim = self.dimension  # OpenAI embedding dimension
             if embeddings.shape[1] != expected_dim:
                 logger.warning(f"Embedding dimension mismatch: got {embeddings.shape[1]}, expected {expected_dim}")
             
@@ -185,7 +186,7 @@ class LanceDBVectorStore:
                 # Ensure embedding is a list of floats (not numpy array)
                 embedding_list = embedding.tolist() if isinstance(embedding, np.ndarray) else list(embedding)
                 
-                # Ensure we have exactly 1536 dimensions
+                # Ensure we have exactly dimension dimensions
                 if len(embedding_list) != expected_dim:
                     # Pad or truncate to expected dimension
                     if len(embedding_list) < expected_dim:
@@ -196,7 +197,7 @@ class LanceDBVectorStore:
                 record = {
                     "id": str(uuid.uuid4()),
                     "text": text,
-                    "embedding": embedding_list,  # List of exactly 1536 floats
+                    "embedding": embedding_list,  # List of exactly dimension floats
                     "metadata": json.dumps(meta),
                     "file_name": file_name,
                     "file_type": file_type,
@@ -243,7 +244,7 @@ class LanceDBVectorStore:
                 query_embedding = query_embedding.flatten()
             
             # Ensure we have exactly 1536 dimensions
-            expected_dim = 1536
+            expected_dim = self.dimension
             if len(query_embedding) != expected_dim:
                 if len(query_embedding) < expected_dim:
                     # Pad with zeros
