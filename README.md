@@ -12,7 +12,6 @@
 
 *Transform your documents into intelligent, conversational knowledge bases*
 
-[🚀 Live Demo](#) | [📖 Documentation](#api-documentation) | [🐛 Report Bug](https://github.com/yourusername/docuchat-ai/issues) | [💡 Request Feature](https://github.com/yourusername/docuchat-ai/issues)
 
 </div>
 
@@ -57,7 +56,6 @@ In today's data-driven world, organizations accumulate massive volumes of unstru
 | **Vector Embeddings** | High-dimensional semantic representations using OpenAI | ✅ |
 | **Conversational AI** | Natural language chat interface with context awareness | ✅ |
 | **Multi-Document Queries** | Search across multiple documents simultaneously | ✅ |
-| **Source Attribution** | Transparent citations with document references | 🔄 |
 | **Real-time Processing** | Asynchronous document processing with progress tracking | 🔄 |
 | **Web Interface** | Modern React/Next.js frontend with responsive design | 🔄 |
 
@@ -101,7 +99,7 @@ In today's data-driven world, organizations accumulate massive volumes of unstru
 #### Backend
 - **Framework**: FastAPI (Python 3.8+)
 - **Vector Database**: LanceDB with PyArrow backend
-- **AI/ML**: OpenAI GPT-4, text-embedding-3-small
+- **AI/ML**: OpenAI GPT-4.1, text-embedding-3-small
 - **Document Processing**: PyPDF2, python-docx, pdfplumber
 - **Async Processing**: asyncio, aiofiles
 - **Configuration**: Pydantic Settings with environment variables
@@ -542,7 +540,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Built with ❤️ by the DocuChat AI Team**
+**Built with ❤️ by Akshat*
 
 If you find this project useful, please ⭐ star it on GitHub!
 
