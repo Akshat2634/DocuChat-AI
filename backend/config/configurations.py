@@ -69,6 +69,11 @@ class RAGIndexingConfig(BaseConfig):
         description="Name of the LanceDB table"
     )
     
+    LANCEDB_PATH: str = Field(
+        default="vector_db",
+        description="Path to the LanceDB database"
+    )
+    
     # Search Configuration
     DEFAULT_SEARCH_LIMIT: int = Field(
         default=5,
