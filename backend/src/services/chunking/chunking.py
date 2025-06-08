@@ -1,6 +1,11 @@
 from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from config import RAGIndexingConfig
+from config.logger import setup_logging
+import logging
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 class Chunker:
@@ -24,8 +29,12 @@ class Chunker:
             List of text chunks
         """
         if not text or not text.strip():
+            logger.warning("No text to chunk")
             return []
-        
-        return self.text_splitter.split_text(text)
+    
+        logger.info(f"Chunking text of length {len(text)}")
+        chunks = self.text_splitter.split_text(text)
+        logger.info(f"Split text into {len(chunks)} chunks")
+        return chunks
         
         

@@ -8,9 +8,10 @@ from lancedb.table import Table
 from lancedb.db import DBConnection
 import pyarrow as pa
 from config import RAGIndexingConfig
+from config.logger import setup_logging
 
+setup_logging()
 logger = logging.getLogger(__name__)
-
 
 class LanceDBVectorStore:
     """

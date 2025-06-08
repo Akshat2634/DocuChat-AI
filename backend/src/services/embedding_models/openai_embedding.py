@@ -3,14 +3,15 @@ OpenAI Embedding Model
 
 Implementation of embedding model using OpenAI's API.
 """
-
-import logging
+from config.logger import setup_logging
 from typing import List, Optional, Dict, Any 
 import numpy as np
 from config import RAGIndexingConfig
 from openai import AsyncOpenAI
 from .base_embedding import BaseEmbeddingModel
+import logging
 
+setup_logging()
 logger = logging.getLogger(__name__)
 
 
