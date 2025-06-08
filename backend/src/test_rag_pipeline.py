@@ -4,10 +4,15 @@ Test RAG Pipeline
 A test implementation of the RAG pipeline for document processing.
 """
 
+import logging
 from typing import List, Dict, Any
 import numpy as np
 from pathlib import Path
 from src.services import DocumentProcessor, Chunker, OpenAIEmbeddingModel, LanceDBVectorStore
+from config.logger import setup_logging
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 class MockUploadFile:
@@ -138,7 +143,7 @@ class TestRAGPipeline:
         # Initialize the embedding model
         await self.embedding_model.initialize()
         
-        print(f"Looking for documents in: {data_dir}")
+        logger.info(f"Looking for documents in: {data_dir}")
         
         # Find all supported files in the data directory
         supported_extensions = ['.pdf', '.docx', '.txt']
@@ -150,17 +155,17 @@ class TestRAGPipeline:
             documents_found.extend(files)
         
         if not documents_found:
-            print("No supported documents found in the data folder.")
+            logger.warning("No supported documents found in the data folder.")
             return
         
-        print(f"Found {len(documents_found)} document(s):")
+        logger.info(f"Found {len(documents_found)} document(s):")
         for doc_path in documents_found:
-            print(f"  - {doc_path.name}")
+            logger.info(f"  - {doc_path.name}")
         
         # Process each document
         for doc_path in documents_found:
             try:
-                print(f"\nProcessing: {doc_path.name}")
+                logger.info(f"\nProcessing: {doc_path.name}")
                 
                 # Read the file content
                 with open(doc_path, 'rb') as file:
@@ -171,15 +176,15 @@ class TestRAGPipeline:
                 
                 # Extract text from the document
                 extracted_text, file_type = await self.document_processor.extract_text_from_upload(mock_file)
-                print(f"Extracted {len(extracted_text)} characters from {doc_path.name}")
+                logger.info(f"Extracted {len(extracted_text)} characters from {doc_path.name}")
                 
                 # Chunk the text
                 chunks = await self.chunker.chunk_text(extracted_text)
-                print(f"Created {len(chunks)} chunks")
+                logger.info(f"Created {len(chunks)} chunks")
                 
                 # Generate embeddings
                 embeddings = await self.embedding_model.generate_embeddings(chunks)
-                print(f"Generated embeddings with shape: {embeddings.shape}")
+                logger.info(f"Generated embeddings with shape: {embeddings.shape}")
                 
                 # Create metadata for each chunk
                 metadata = []
@@ -200,9 +205,9 @@ class TestRAGPipeline:
                     file_name=doc_path.name,
                     file_type=file_type
                 )
-                print(f"Stored {len(chunks)} embeddings in vector store")
+                logger.info(f"Stored {len(chunks)} embeddings in vector store")
                 
-                print(f"✅ Successfully processed: {doc_path.name}")
+                logger.info(f"✅ Successfully processed: {doc_path.name}")
                 
             except Exception as e:
-                print(f"❌ Error processing {doc_path.name}: {str(e)}")
+                logger.error(f"❌ Error processing {doc_path.name}: {str(e)}")
