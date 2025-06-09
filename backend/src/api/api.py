@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.routers import document_upload
+from src.api.routers import chat
 from config.logger import setup_logging
 
 setup_logging()
@@ -19,6 +20,8 @@ origins = [
 
 
 app.include_router(document_upload.router)
+app.include_router(chat.router)
+
 
 app.add_middleware(
     CORSMiddleware,

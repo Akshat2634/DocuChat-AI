@@ -4,6 +4,7 @@ OpenAI Embedding Model
 Implementation of embedding model using OpenAI's API.
 """
 from config.logger import setup_logging
+from config.openai import get_openai_client
 from typing import List, Optional, Dict, Any 
 import numpy as np
 from config import RAGIndexingConfig
@@ -39,7 +40,7 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
             raise ValueError("OpenAI API key is required. Please set OPENAI_API_KEY in your environment.")
         
         try:
-            self.client = AsyncOpenAI(api_key=self.api_key)
+            self.client = await get_openai_client()
             self.is_initialized = True
             logger.info(f"OpenAI embedding model '{self.model_name}' initialized successfully")
             
