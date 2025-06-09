@@ -48,12 +48,17 @@ class RAGIndexingConfig(BaseConfig):
         description="OpenAI embedding model"
     )
     
+    OPENAI_CHAT_MODEL: str = Field(
+        default="gpt-4.1-mini",
+        description="OpenAI model"
+    )
+    
     OPENAI_EMBEDDING_DIMENSION: int = Field(
         default=1536,
         description="OpenAI embedding dimension"
     )
     
-    OPENAI_EMBEDDING_PROVIDER: str = Field(
+    EMBEDDING_PROVIDER: str = Field(
         default="openai",
         description="OpenAI embedding provider"
     )
@@ -81,7 +86,7 @@ class RAGIndexingConfig(BaseConfig):
     )
     
     SIMILARITY_THRESHOLD: float = Field(
-        default=0.7,
+        default=0.6,
         description="Minimum similarity threshold for search results"
     )
     

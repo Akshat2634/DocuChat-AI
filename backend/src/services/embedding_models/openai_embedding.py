@@ -4,6 +4,7 @@ OpenAI Embedding Model
 Implementation of embedding model using OpenAI's API.
 """
 from config.logger import setup_logging
+from config.openai import get_openai_client
 from typing import List, Optional, Dict, Any 
 import numpy as np
 from config import RAGIndexingConfig
@@ -28,13 +29,9 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
         self.api_key = config.OPENAI_API_KEY
         self.client = None
         self.batch_size = config.BATCH_SIZE
-        # Set embedding dimension based on model
-        if "text-embedding-3-small" in self.model_name:
-            self.embedding_dim = 1536
-        elif "text-embedding-3-large" in self.model_name:
-            self.embedding_dim = 3072
-        else:
-            self.embedding_dim = 1536  # default
+        self.embedding_dim = config.OPENAI_EMBEDDING_DIMENSION
+        self.model_name = config.OPENAI_EMBEDDING_MODEL
+
 
     
     async def initialize(self) -> None:
@@ -43,7 +40,7 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
             raise ValueError("OpenAI API key is required. Please set OPENAI_API_KEY in your environment.")
         
         try:
-            self.client = AsyncOpenAI(api_key=self.api_key)
+            self.client = await get_openai_client()
             self.is_initialized = True
             logger.info(f"OpenAI embedding model '{self.model_name}' initialized successfully")
             
@@ -62,7 +59,7 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
             numpy array of embeddings
         """
         if not self.is_initialized:
-            raise ValueError("Model not initialized. Call initialize() first.")
+            await self.initialize()
         
         if not texts:
             return np.array([])
@@ -103,7 +100,7 @@ class OpenAIEmbeddingModel(BaseEmbeddingModel):
             numpy array representing the embedding
         """
         if not self.is_initialized:
-            raise ValueError("Model not initialized. Call initialize() first.")
+            await self.initialize()
         
         try:
             response = await self.client.embeddings.create(

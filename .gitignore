@@ -35,10 +35,7 @@ Thumbs.db
 backend/data/*.pdf
 backend/data/*.docx
 backend/data/*.txt
-backend/vector_db/*.lance
-backend/vector_db/*.lancedb
-backend/vector_db/data/
-backend/vector_db/*.db
+backend/vector_db/*
 *.log
 
 # Dependencies
