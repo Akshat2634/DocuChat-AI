@@ -9,9 +9,6 @@ from lancedb.db import DBConnection
 import pyarrow as pa
 from config import RAGIndexingConfig
 from config.logger import setup_logging
-import json
-from datetime import datetime
-import uuid
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -35,7 +32,6 @@ class LanceDBVectorStore:
         self.db: Optional[DBConnection] = None
         self.table: Optional[Table] = None
         self.dimension = config.OPENAI_EMBEDDING_DIMENSION
-        self.similarity_threshold = config.SIMILARITY_THRESHOLD
 
         
     async def setup_lance_db(self) -> DBConnection:
@@ -80,7 +76,7 @@ class LanceDBVectorStore:
     async def create_or_get_table(self) -> Table:
         """
         Create or get existing table for storing embeddings.
-        If table exists, return it. If not, create a new one.
+        Always deletes existing table completely and creates a new one.
         
         Returns:
             LanceDB table object
@@ -89,13 +85,18 @@ class LanceDBVectorStore:
             await self.setup_lance_db()
         
         try:
-            # Check if table already exists
+            #TODO: Commenting for now as I will be making folder structure for each user based on user_id
+            # Always delete existing table if it exists
             if self.table_name in self.db.table_names():
-                logger.info(f"Table '{self.table_name}' already exists, using existing table")
-                self.table = self.db.open_table(self.table_name)
-                return self.table
+                logger.info(f"Deleting existing table: {self.table_name}")
+                self.db.drop_table(self.table_name)
+                logger.info(f"Deleted existing table: {self.table_name}")
             
             # Create new table with proper schema
+            import json
+            from datetime import datetime
+            import uuid
+            
             # Define the schema first
             schema = pa.schema([
                 pa.field("id", pa.string()),
@@ -125,7 +126,7 @@ class LanceDBVectorStore:
                 self.table_name,
                 data=df,
                 schema=schema,
-                mode="create",
+                mode="create"
             )
             
             # Remove the sample data
@@ -166,6 +167,10 @@ class LanceDBVectorStore:
             raise ValueError("Texts, embeddings, and metadata must have the same length")
         
         try:
+            import json
+            from datetime import datetime
+            import uuid
+            
             # Ensure embeddings are 2D numpy array with correct shape
             if embeddings.ndim == 1:
                 embeddings = embeddings.reshape(1, -1)
@@ -216,7 +221,7 @@ class LanceDBVectorStore:
         self,
         query_embedding: np.ndarray,
         limit: int = 5,
-        similarity_threshold: Optional[float] = None
+        similarity_threshold: float = 0.7
     ) -> List[Dict[str, Any]]:
         """
         Search for similar embeddings.
@@ -233,15 +238,13 @@ class LanceDBVectorStore:
         if not hasattr(self, 'table') or not self.table:
             await self.setup_lance_db()
             await self.create_or_get_table()
-            
-        if similarity_threshold is None:
-            similarity_threshold = self.similarity_threshold
+        
         try:
             # Ensure query embedding is 1D and convert to list
             if query_embedding.ndim > 1:
                 query_embedding = query_embedding.flatten()
             
-            # Ensure we have exactly the expected dimensions
+            # Ensure we have exactly 1536 dimensions
             expected_dim = self.dimension
             if len(query_embedding) != expected_dim:
                 if len(query_embedding) < expected_dim:
@@ -262,15 +265,14 @@ class LanceDBVectorStore:
                 .to_pandas()
             )
             
+            # Filter by similarity threshold if needed
+            if similarity_threshold > 0:
+                results = results[results['_distance'] <= (1 - similarity_threshold)]
+            
             # Convert results to list of dictionaries
             search_results = []
             for _, row in results.iterrows():
-                # Calculate similarity score from distance
-                similarity_score = 1 - row["_distance"]
-                
-                # Apply similarity threshold filter
-                if similarity_threshold > 0 and similarity_score < similarity_threshold:
-                    continue
+                import json
                 
                 result = {
                     "id": row["id"],
@@ -279,7 +281,7 @@ class LanceDBVectorStore:
                     "file_name": row["file_name"],
                     "file_type": row["file_type"],
                     "chunk_index": row["chunk_index"],
-                    "similarity_score": similarity_score,
+                    "similarity_score": 1 - row["_distance"],
                     "created_at": row["created_at"]
                 }
                 search_results.append(result)
@@ -392,61 +394,6 @@ class LanceDBVectorStore:
             logger.info(f"Processed {file_name}: {len(doc['texts'])} chunks")
         
         return results
-
-    async def get_all_embeddings(self) -> List[Dict[str, Any]]:
-        """
-        Get all embeddings and documents from the vector database at the current db_path.
-        
-        Returns:
-            List of dictionaries containing all embeddings and document data
-        """
-        try:
-            # Ensure we have a connection to the specific db_path
-            if not self.db or not self.table:
-                await self.setup_lance_db()
-                await self.create_or_get_table()
-            
-            # Check if the database path exists
-            if not self.db_path.exists():
-                logger.warning(f"Database path does not exist: {self.db_path}")
-                return []
-            
-            # Check if table exists in this specific database
-            table_names = self.db.table_names()
-            if self.table_name not in table_names:
-                logger.warning(f"Table '{self.table_name}' not found in database at {self.db_path}")
-                return []
-            
-            # Get all data from the table at this specific db_path
-            df = self.table.to_pandas()
-            
-            if df.empty:
-                logger.info(f"No embeddings found in database at {self.db_path}")
-                return []
-            
-            # Convert DataFrame to list of dictionaries
-            all_data = []
-            for _, row in df.iterrows():
-                import json
-                
-                record = {
-                    "id": row["id"],
-                    "text": row["text"],
-                    "embedding": row["embedding"],  # This is already a list
-                    "metadata": json.loads(row["metadata"]) if row["metadata"] else {},
-                    "file_name": row["file_name"],
-                    "file_type": row["file_type"],
-                    "chunk_index": row["chunk_index"],
-                    "created_at": row["created_at"]
-                }
-                all_data.append(record)
-            
-            logger.info(f"Retrieved {len(all_data)} embeddings from database at {self.db_path}")
-            return all_data
-            
-        except Exception as e:
-            logger.error(f"Failed to get all embeddings from {self.db_path}: {e}")
-            return []
 
     async def get_files_summary(self) -> Dict[str, Any]:
         """
