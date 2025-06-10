@@ -222,7 +222,7 @@ export default function HomePage() {
               whileTap={{ scale: 0.95 }}
             >
               <Sparkles className="w-4 h-4" />
-              <span>Powered by Advanced AI</span>
+              <span>AI-Powered Document Intelligence</span>
             </motion.div>
 
             <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 gradient-text from-vibrant-purple via-vibrant-blue to-vibrant-teal">
@@ -230,7 +230,7 @@ export default function HomePage() {
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
               Upload your documents and start an intelligent conversation. Get instant answers, insights, and summaries
-              powered by advanced AI technology.
+              powered by RAG (Retrieval-Augmented Generation) and LanceDB vector database technology.
             </p>
           </motion.div>
 
