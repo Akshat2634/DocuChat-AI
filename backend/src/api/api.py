@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.routers import document_upload
 from src.api.routers import chat
+from src.api.routers import cleanup
 from config.logger import setup_logging
 
 setup_logging()
@@ -21,6 +22,7 @@ origins = [
 
 app.include_router(document_upload.router)
 app.include_router(chat.router)
+app.include_router(cleanup.router)
 
 
 app.add_middleware(
@@ -32,6 +34,21 @@ app.add_middleware(
 )
 
 
+@app.on_event("startup")
+async def startup_event():
+    """Initialize scheduled tasks on startup."""
+    logger.info("Starting up application and initializing scheduled tasks...")
+    
+    # Import and start the scheduled cleanup task
+    from src.tasks.cleanup import scheduled_vector_db_cleanup
+    
+    # The @repeat_every decorator will handle the scheduling
+    # We just need to call it once to start the periodic execution
+    scheduled_vector_db_cleanup()
+    
+    logger.info("Scheduled vector DB cleanup task initialized")
+
+
 @app.get("/")
 async def root():
     logger.info("Root endpoint called")
@@ -41,6 +58,8 @@ async def root():
         "description": "API for document processing, embedding generation, and RAG querying",
         "endpoints": [
             {"path": "/api/documents/upload", "method": "POST", "description": "Upload documents for processing"},
+            {"path": "/api/cleanup/vector-db", "method": "POST", "description": "Manually trigger vector DB cleanup"},
+            {"path": "/api/cleanup/status", "method": "GET", "description": "Get cleanup configuration and status"},
             {"path": "/health", "method": "GET", "description": "Check the health of the API"}
         ]
     }
