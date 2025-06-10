@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 const vibrantButtonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden gap-2",
   {
     variants: {
       variant: {
@@ -22,8 +22,9 @@ const vibrantButtonVariants = cva(
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8 text-base",
+        sm: "h-9 rounded-md px-3 text-sm",
+        lg: "h-12 rounded-lg px-8 text-base font-semibold",
+        xl: "h-14 rounded-lg px-10 text-lg font-semibold",
         icon: "h-10 w-10",
       },
     },
@@ -56,12 +57,20 @@ const VibrantButton = React.forwardRef<HTMLButtonElement, VibrantButtonProps>(
           ref={ref}
           {...props}
         >
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-inherit">
-              <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" />
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <motion.div
+                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+              />
+              <span>Processing...</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2">
+              {children}
             </div>
           )}
-          <span className={cn(isLoading && "opacity-0")}>{children}</span>
           <div className="absolute inset-0 -z-10 bg-gradient-to-r opacity-0 transition-opacity group-hover:opacity-10" />
         </Comp>
       </motion.div>

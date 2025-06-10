@@ -44,7 +44,17 @@ export function VibrantChatInput({ onSendMessage, isLoading }: VibrantChatInputP
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <form onSubmit={handleSubmit} className="relative">
-        <div className="relative flex items-end rounded-xl border-2 focus-within:border-vibrant-purple transition-colors bg-card overflow-hidden">
+        <motion.div
+          className="relative flex items-end rounded-xl border-2 focus-within:border-vibrant-purple transition-colors bg-card overflow-hidden"
+          animate={isLoading ? {
+            boxShadow: [
+              "0 0 0 0 rgba(139,92,246,0)",
+              "0 0 0 2px rgba(139,92,246,0.2)",
+              "0 0 0 0 rgba(139,92,246,0)",
+            ],
+          } : {}}
+          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+        >
           {/* Textarea */}
           <textarea
             ref={textareaRef}
@@ -72,12 +82,17 @@ export function VibrantChatInput({ onSendMessage, isLoading }: VibrantChatInputP
               >
                 {isLoading ? (
                   <motion.div
-                    className="w-4 h-4 border-2 border-t-transparent rounded-full"
+                    className="w-4 h-4 border-2 border-current border-t-transparent rounded-full"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
                   />
                 ) : (
-                  <Send className="h-4 w-4" />
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <Send className="h-4 w-4" />
+                  </motion.div>
                 )}
               </VibrantButton>
             </motion.div>
@@ -92,28 +107,18 @@ export function VibrantChatInput({ onSendMessage, isLoading }: VibrantChatInputP
             }}
             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
           />
-        </div>
+        </motion.div>
 
-        {/* Additional action buttons */}
-        <div className="flex justify-end mt-2 space-x-2">
-          <VibrantButton
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-muted-foreground hover:text-vibrant-purple"
+        {/* AI Disclaimer */}
+        <div className="mt-4 px-2 text-center">
+          <motion.p
+            className="text-xs text-gray-400 opacity-60 font-thin"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.6 }}
+            transition={{ delay: 0.5 }}
           >
-            <Mic className="h-3 w-3 mr-1" />
-            Voice
-          </VibrantButton>
-          <VibrantButton
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-xs text-muted-foreground hover:text-vibrant-blue"
-          >
-            <Paperclip className="h-3 w-3 mr-1" />
-            Attach
-          </VibrantButton>
+            AI can make mistakes. Please double-check responses.
+          </motion.p>
         </div>
       </form>
     </motion.div>

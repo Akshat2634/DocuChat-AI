@@ -298,23 +298,14 @@ export default function HomePage() {
             <VibrantButton
               onClick={handleUpload}
               disabled={selectedFiles.length === 0 || isUploading}
-              size="lg"
+              size="xl"
               variant="purple"
-              className="px-12 py-6 text-lg font-semibold"
+              isLoading={isUploading}
             >
-              {isUploading ? (
-                <>
-                  <motion.div
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                  />
-                  Processing...
-                </>
-              ) : (
+              {!isUploading && (
                 <>
                   Start Chatting
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="h-5 w-5" />
                 </>
               )}
             </VibrantButton>

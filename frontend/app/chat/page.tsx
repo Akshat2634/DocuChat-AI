@@ -9,6 +9,7 @@ import { VibrantChatMessage } from "@/components/vibrant-chat-message"
 import { VibrantChatInput } from "@/components/vibrant-chat-input"
 import { AnimatedBackground } from "@/components/animated-background"
 import { ChatMessageSkeleton } from "@/components/loading-skeleton"
+import { AnimatedChatLoader } from "@/components/animated-chat-loader"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { type ChatMessage as ChatMessageType, sendChatMessage } from "@/lib/api"
 import { getSessionId } from "@/lib/session"
@@ -20,6 +21,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState<string>("")
   const [isTyping, setIsTyping] = useState(false)
+  const [loadingStage, setLoadingStage] = useState<"thinking" | "processing" | "responding">("thinking")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const { toast } = useToast()
@@ -59,11 +61,18 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMessage])
     setIsLoading(true)
     setIsTyping(true)
+    setLoadingStage("thinking")
 
     try {
-      // Simulate typing delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Thinking stage
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      setLoadingStage("processing")
 
+      // Processing stage
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setLoadingStage("responding")
+
+      // Make API call
       const response = await sendChatMessage(content, sessionId)
 
       setIsTyping(false)
@@ -188,15 +197,16 @@ export default function ChatPage() {
               ))}
             </AnimatePresence>
 
-            {/* Typing indicator */}
+            {/* Animated typing indicator */}
             <AnimatePresence>
               {isTyping && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <ChatMessageSkeleton />
+                  <AnimatedChatLoader stage={loadingStage} />
                 </motion.div>
               )}
             </AnimatePresence>
