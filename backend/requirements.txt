@@ -30,3 +30,7 @@ python-multipart>=0.0.6      # for file uploads
 colorama>=0.4.6               # for colored logging output
 fastapi-utils>=0.2.1          # for periodic tasks
 typing-inspect>=0.9.0         # required by fastapi-utils
+
+# Redis
+redis>=5.0.0
+aioredis>=2.0.0 

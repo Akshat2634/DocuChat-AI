@@ -10,6 +10,7 @@ from src.ai.tool_call import process_tool_call
 import logging
 from typing import List, Dict
 import asyncio
+from src.ai.middleware import RedisConversationStore
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -21,18 +22,22 @@ class QueryEngine:
         self.model = config.OPENAI_CHAT_MODEL
         self.system_prompt = SYSTEM_PROMPT
         self.tools = TOOLS
+        self.redis = RedisConversationStore()
         logger.info(f"QueryEngine initialized with model: {self.model}")
         
-    async def chat_completion(self, query: str,conversation_history: List[Dict], user_id: str):
+    async def chat_completion(self, user_query: str,conversation_history: List[Dict], user_id: str):
         
         try:
             self.client = await openai_client.get_openai_client()
             logger.debug("OpenAI client initialized successfully")
         
+            # Track the starting length of conversation history to identify new messages
+            initial_history_length = len(conversation_history)
+            
             if not any(message["role"] == "system" for message in conversation_history):
                 conversation_history.insert(0, {"role": "system", "content": self.system_prompt})
                 
-            conversation_history.append({"role": "user", "content": query})
+            conversation_history.append({"role": "user", "content": user_query})
             
             response =  await self.client.chat.completions.create(
                 model=self.model,
@@ -92,14 +97,25 @@ class QueryEngine:
                     max_tokens=2500
                 )
                 ai_response = await parse_openai_response(final_response)
+                conversation_history.append({"role": "assistant", "content": ai_response})
+                
                 logger.info("Final response generated successfully with tool calls")
-                return ai_response
                 
             else:
                 logger.info("No tool calls detected, returning direct response")
                 ai_response = await parse_openai_response(response)
+                conversation_history.append({"role": "assistant", "content": ai_response})
                 logger.info("Direct response generated successfully")
-                return ai_response
+            
+            # Save only the new messages to Redis (from the initial length onwards)
+            new_messages = conversation_history[initial_history_length:]
+            if new_messages:
+                for message in new_messages:
+                    await self.redis.add_message_to_conversation(user_id, message)
+                logger.info(f"Saved {len(new_messages)} new messages to Redis for user {user_id}")
+            
+            return ai_response
+            
         except openai.RateLimitError as e:
             logger.error(f"OpenAI API rate limit exceeded: {str(e)}")
             logger.exception(f"An error occurred: {str(e)}")

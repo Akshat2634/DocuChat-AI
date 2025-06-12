@@ -95,3 +95,29 @@ class RAGIndexingConfig(BaseConfig):
         default=32,
         description="Batch size for embedding generation"
     )
+    
+    # Redis Configuration
+    REDIS_HOST: str = Field(
+        default="localhost",
+        description="Redis host"
+    )
+    
+    REDIS_PORT: int = Field(
+        default=6379,
+        description="Redis port"
+    )
+    
+    REDIS_DB: int = Field(
+        default=0,
+        description="Redis database"
+    )
+    
+    CONVERSATION_TTL: int = Field(
+        default=7200,
+        description="Conversation TTL in seconds"
+    )
+    
+    MAX_CONVERSATION_LENGTH: int = Field(
+        default=50,
+        description="Maximum messages per conversation"
+    )
