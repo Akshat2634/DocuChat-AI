@@ -15,7 +15,7 @@ CLEANUP_INTERVAL_SECONDS = int(os.environ.get("VECTOR_DB_CLEANUP_INTERVAL", 8640
 VECTOR_DB_PATH = Path(__file__).parent.parent.parent / "vector_db"
 
 
-def clear_vector_db_folder() -> None:
+async def clear_vector_db_folder() -> None:
     """
     Clear all contents of the vector_db folder except for README.md files.
     
@@ -61,7 +61,7 @@ def clear_vector_db_folder() -> None:
 
 
 @repeat_every(seconds=CLEANUP_INTERVAL_SECONDS, logger=logger)
-def scheduled_vector_db_cleanup() -> None:
+async def scheduled_vector_db_cleanup() -> None:
     """
     Scheduled task to clean up the vector_db folder.
     
@@ -69,11 +69,11 @@ def scheduled_vector_db_cleanup() -> None:
     The interval is configurable via the VECTOR_DB_CLEANUP_INTERVAL environment variable.
     """
     logger.info("Starting scheduled vector DB cleanup...")
-    clear_vector_db_folder()
+    await clear_vector_db_folder()
     logger.info("Scheduled vector DB cleanup completed.")
 
 
-def manual_vector_db_cleanup() -> dict:
+async def manual_vector_db_cleanup() -> dict:
     """
     Manual cleanup function that can be called via API endpoint.
     
@@ -82,7 +82,7 @@ def manual_vector_db_cleanup() -> dict:
     """
     try:
         logger.info("Starting manual vector DB cleanup...")
-        clear_vector_db_folder()
+        await clear_vector_db_folder()
         return {
             "status": "success",
             "message": "Vector DB cleanup completed successfully"

@@ -44,7 +44,7 @@ async def startup_event():
     
     # The @repeat_every decorator will handle the scheduling
     # We just need to call it once to start the periodic execution
-    scheduled_vector_db_cleanup()
+    await scheduled_vector_db_cleanup()
     
     logger.info("Scheduled vector DB cleanup task initialized")
 
