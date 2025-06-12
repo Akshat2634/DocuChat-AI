@@ -15,19 +15,35 @@ class RedisConversationStore:
         self.redis_host = config.REDIS_HOST
         self.redis_port = config.REDIS_PORT
         self.redis_db = config.REDIS_DB
+        self.redis_username = config.REDIS_USERNAME
+        self.redis_password = config.REDIS_PASSWORD
+        self.redis_ssl = config.REDIS_SSL
         self.conversation_ttl = config.CONVERSATION_TTL
         self.max_conversation_length = config.MAX_CONVERSATION_LENGTH
         self.redis_client = None
-        logger.info(f"Redis initialized with host: {self.redis_host}, port: {self.redis_port}, db: {self.redis_db}")
+        logger.info(f"Redis initialized with host: {self.redis_host}, port: {self.redis_port}, db: {self.redis_db}, ssl: {self.redis_ssl}")
     
     async def get_redis_client(self):
         if not self.redis_client:
-            self.redis_client = redis.Redis(
-                host=self.redis_host,
-                port=self.redis_port,
-                db=self.redis_db,
-                decode_responses=True
-            )
+            connection_params = {
+                "host": self.redis_host,
+                "port": self.redis_port,
+                "db": self.redis_db,
+                "decode_responses": True
+            }
+            
+            # Add authentication if provided
+            if self.redis_username:
+                connection_params["username"] = self.redis_username
+            if self.redis_password:
+                connection_params["password"] = self.redis_password
+            
+            # Add SSL if enabled
+            if self.redis_ssl:
+                connection_params["ssl"] = True
+                connection_params["ssl_cert_reqs"] = None
+            
+            self.redis_client = redis.Redis(**connection_params)
         return self.redis_client
     
     def _get_conversation_key(self, user_id: str) -> str:

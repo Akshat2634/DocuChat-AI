@@ -160,8 +160,8 @@ OPENAI_CHAT_MODEL=gpt-4.1-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 
 # Redis Configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
+REDIS_HOST= "redis-cloud-host-url" 
+REDIS_PORT="redis-cloud-port"
 REDIS_DB=0
 CONVERSATION_TTL=7200
 MAX_CONVERSATION_LENGTH=50

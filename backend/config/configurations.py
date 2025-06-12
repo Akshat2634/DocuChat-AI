@@ -112,6 +112,22 @@ class RAGIndexingConfig(BaseConfig):
         description="Redis database"
     )
     
+    # Redis Cloud Configuration
+    REDIS_USERNAME: Optional[str] = Field(
+        default=None,
+        description="Redis username (for Redis Cloud)"
+    )
+    
+    REDIS_PASSWORD: Optional[str] = Field(
+        default=None,
+        description="Redis password (for Redis Cloud)"
+    )
+    
+    REDIS_SSL: bool = Field(
+        default=False,
+        description="Use SSL for Redis connection"
+    )
+    
     CONVERSATION_TTL: int = Field(
         default=7200,
         description="Conversation TTL in seconds"
